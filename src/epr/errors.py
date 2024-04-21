@@ -4,42 +4,34 @@
 
 
 class BaseError(Exception):
-
     """Base Error Class"""
 
 
 class RunCmdError(BaseError):
-
     """Raised when a command fails to run"""
 
 
 class CmdMissingError(BaseError):
-
     """Raised when a command is missing"""
 
 
 class FileNotFoundError(BaseError):
-
     """Raised when a file is not found"""
 
 
 class InvalidKeyError(BaseError):
-
     """An invalid key was specified"""
 
 
 class KeyNotFoundError(BaseError):
-
     """The specified key was not found"""
 
 
 class NotImplemented(BaseError):
-
     """function not implemented"""
 
 
 class EPRError(Exception):
-
     """Base Error for EPR"""
 
     message = "An error occurred with the request to EPR"
@@ -51,7 +43,6 @@ class EPRError(Exception):
 
 
 class GraphQLError(EPRError):
-
     """Raised when a graphql request fails"""
 
     message = "Error making GraphQL request to EPR"

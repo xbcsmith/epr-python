@@ -3,7 +3,7 @@ requires = ["setuptools>=40.8.0", "wheel"]
 build-backend = "setuptools.build_meta:__legacy__"
 
 [project]
-name = "epr"
+name = "epr-python"
 version = "0.1.0"
 description = "A Python Client for Event Provenance Registry (EPR)"
 readme = "README.md"
@@ -23,3 +23,13 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
+dependencies = [
+  "urllib3",
+  "jsonpath-ng",
+]
+
+[project.scripts]
+eprcli = "epr.main:main"
+
+[project.urls]
+"Homepage" = "https://github.com/xbcsmith/epr-python"

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: © 2023 Brett Smith <xbcsmith@gmail.com>
+# SPDX-FileCopyrightText: © 2024 Brett Smith <xbcsmith@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
-"""
-Classes for holding object data
-"""
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Dict, List
@@ -29,8 +26,12 @@ class Model:
     """Base class for data objects. Provides as_dict"""
 
     def as_dict(self):
-        """Get a dictionary containg object properties"""
+        """Get a dictionary contain object properties"""
         return asdict(self)
+
+    def as_dict_query(self):
+        """Get a dictionary contain object properties"""
+        return {k: v for k, v in self.as_dict().items() if v}
 
 
 @dataclass
@@ -48,6 +49,7 @@ class Event(Model):
     success: bool = False
     created_at: str = field(default="", compare=False)
     event_receiver_id: str = ""
+    event_receiver: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
