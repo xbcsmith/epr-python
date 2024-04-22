@@ -64,7 +64,7 @@ class ReceiverFingerprint(Fingerprint):
 class GroupFingerprint(Fingerprint):
     def __init__(self, data):
         self._data = data
-        self._keys = ("type", "description", "name", "version")
+        self._keys = ("type", "description", "name", "version", "enabled", "event_receiver_ids")
         self._fingerprint = None
         if self._check():
             self._fingerprint = self._calculate()

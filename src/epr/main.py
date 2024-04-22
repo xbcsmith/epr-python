@@ -90,6 +90,7 @@ class CmdLine(object):
             dest="name",
             action="store",
             default=None,
+            required=True,
             help="Name of the Event",
         )
         event_parser.add_argument(
@@ -97,6 +98,7 @@ class CmdLine(object):
             dest="version",
             action="store",
             default=None,
+            required=True,
             help="Version of the Event",
         )
         event_parser.add_argument(
@@ -104,6 +106,7 @@ class CmdLine(object):
             dest="release",
             action="store",
             default=None,
+            required=True,
             help="Release of the Event",
         )
         event_parser.add_argument(
@@ -111,6 +114,7 @@ class CmdLine(object):
             dest="platform_id",
             action="store",
             default=None,
+            required=True,
             help="Platform ID of the Event",
         )
         event_parser.add_argument(
@@ -118,6 +122,7 @@ class CmdLine(object):
             dest="package",
             action="store",
             default=None,
+            required=True,
             help="Package of the Event",
         )
         event_parser.add_argument(
@@ -125,6 +130,7 @@ class CmdLine(object):
             dest="description",
             action="store",
             default=None,
+            required=True,
             help="Description of the Event",
         )
         event_parser.add_argument(
@@ -132,6 +138,7 @@ class CmdLine(object):
             dest="payload",
             action="store",
             default=None,
+            required=True,
             help="Payload of the Event",
         )
         event_parser.add_argument(
@@ -139,6 +146,7 @@ class CmdLine(object):
             dest="success",
             action="store",
             default=None,
+            required=True,
             help="Success of the Event",
         )
         event_parser.add_argument(
@@ -146,6 +154,7 @@ class CmdLine(object):
             dest="event_receiver_id",
             action="store",
             default=None,
+            required=True,
             help="Event Receiver ID of the Event",
         )
         event_receiver_parser = subparsers.add_parser("event-receiver", help="Event Receiver related options")
@@ -154,6 +163,7 @@ class CmdLine(object):
             dest="name",
             action="store",
             default=None,
+            required=True,
             help="Name of the Event Receiver",
         )
         event_receiver_parser.add_argument(
@@ -161,6 +171,7 @@ class CmdLine(object):
             dest="type",
             action="store",
             default=None,
+            required=True,
             help="Type of the Event Receiver",
         )
         event_receiver_parser.add_argument(
@@ -168,6 +179,7 @@ class CmdLine(object):
             dest="version",
             action="store",
             default=None,
+            required=True,
             help="Version of the Event Receiver",
         )
         event_receiver_parser.add_argument(
@@ -175,6 +187,7 @@ class CmdLine(object):
             dest="description",
             action="store",
             default=None,
+            required=True,
             help="Description of the Event Receiver",
         )
         event_receiver_parser.add_argument(
@@ -182,6 +195,7 @@ class CmdLine(object):
             dest="schema",
             action="store",
             default=None,
+            required=True,
             help="Schema of the Event Receiver",
         )
         event_receiver_group_parser = subparsers.add_parser(
@@ -192,6 +206,7 @@ class CmdLine(object):
             dest="name",
             action="store",
             default=None,
+            required=True,
             help="Name of the Event Receiver Group",
         )
         event_receiver_group_parser.add_argument(
@@ -206,6 +221,7 @@ class CmdLine(object):
             dest="version",
             action="store",
             default=None,
+            required=True,
             help="Version of the Event Receiver Group",
         )
         event_receiver_group_parser.add_argument(
@@ -213,6 +229,7 @@ class CmdLine(object):
             dest="description",
             action="store",
             default=None,
+            required=True,
             help="Description of the Event Receiver Group",
         )
         event_receiver_group_parser.add_argument(
@@ -220,6 +237,7 @@ class CmdLine(object):
             dest="event_receiver_ids",
             action="store",
             default=None,
+            required=True,
             help="Event Receiver IDs of the Event Receiver Group",
         )
 
