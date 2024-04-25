@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
+import pdb
+import traceback
+
+
 class BaseError(Exception):
     """Base Error Class"""
 
@@ -51,8 +55,6 @@ class GraphQLError(EPRError):
 def debug_except_hook(type, value, tb):
     print(f"epr python hates {type.__name__}")
     print(str(type))
-    import pdb
-    import traceback
 
     traceback.print_exception(type, value, tb)
     pdb.post_mortem(tb)

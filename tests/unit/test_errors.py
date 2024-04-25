@@ -11,8 +11,6 @@ from tests import base
 class ErrorsTestCase(base.BaseTestCase):
     def setUp(self):
         super(ErrorsTestCase, self).setUp()
-        self.builddir = self.mkdir("build")
-        self.resultsdir = self.mkdir("results")
         self.errors = dict(
             BaseError="BaseError",
             RunCmdError="BaseError",
@@ -21,6 +19,8 @@ class ErrorsTestCase(base.BaseTestCase):
             InvalidKeyError="BaseError",
             KeyNotFoundError="BaseError",
             NotImplemented="BaseError",
+            EPRError="EPRError",
+            GraphQLError="EPRError",
         )
 
     def test_errors(self):

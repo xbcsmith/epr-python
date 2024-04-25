@@ -541,7 +541,7 @@ class CmdLine(object):
 
     def version(self):
         """
-        Prints version of pipesbom
+        Prints version of eprcli
         """
         print(constants.info())
 
