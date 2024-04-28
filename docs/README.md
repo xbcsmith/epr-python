@@ -9,9 +9,9 @@ EPR Python is a python client for the Event Provenance Registry server.
 A model example using the models in the `epr` package.
 
 ```python
-from epr.models import Event_Receiver
+from epr.models import EventReceiver
 
-event_receiver_foo = Event_Receiver()
+event_receiver_foo = EventReceiver()
 event_receiver_foo.name = "foo-receiver"
 event_receiver_foo.type = "dev.events.foo"
 event_receiver_foo.version = "1.0.0"
@@ -26,11 +26,11 @@ print(f"Fingerprint: {event_receiver_foo.compute_fingerprint()}")
 A model example a dictionary and the models in the `epr` package.
 
 ```python
-from epr.models import Event_Receiver
+from epr.models import EventReceiver
 
 erf = dict(name="foo-receiver", type="dev.events.foo", version="1.0.0", description="The Event Receiver for the Foo of Brixton", schema="{}")
 
-erf_obj = Event_Receiver(**erf)
+erf_obj = EventReceiver(**erf)
 
 print(f"Name: {erf_obj.name}")
 print(f"Type: {erf_obj.type}")
@@ -43,14 +43,14 @@ A Client create example using the models in the `epr` package.
 
 ```python
 from epr.client import Client
-from epr.models import Event, Event_Receiver, Event_Receiver_Group
+from epr.models import Event, EventReceiver, EventReceiverGroup
 
 url = "http://localhost:8042"
 headers = {}
 client = Client(url, headers=headers)
 
 # Create an event receiver
-event_receiver_foo = Event_Receiver()
+event_receiver_foo = EventReceiver()
 event_receiver_foo.name = "foo-receiver-2"
 event_receiver_foo.type = "dev.events.foo"
 event_receiver_foo.version = "1.0.0"
@@ -61,7 +61,7 @@ event_receiver_foo_res = client.create_event_receiver(params=event_receiver_foo)
 event_receiver_foo_id = event_receiver_foo_res["data"]["create_event_receiver"]
 
 
-event_receiver_bar = Event_Receiver()
+event_receiver_bar = EventReceiver()
 event_receiver_bar.name = "bar-receiver-1"
 event_receiver_bar.type = "dev.events.bar"
 event_receiver_bar.version = "1.0.0"
@@ -73,7 +73,7 @@ event_receiver_bar_id = event_receiver_bar_res["data"]["create_event_receiver"]
 
 # Create an event receiver group
 
-event_receiver_group_foo = Event_Receiver_Group()
+event_receiver_group_foo = EventReceiverGroup()
 event_receiver_group_foo.name = "foo-bar-receiver-group-1"
 event_receiver_group_foo.type = "dev.events.foo.bar.complete"
 event_receiver_group_foo.version = "1.0.0"
@@ -124,7 +124,7 @@ Create an event receiver and event receiver group. Then send events.
 
 ```python
 from epr.client import Client
-from epr.models import Event, Event_Receiver, Event_Receiver_Group
+from epr.models import Event, EventReceiver, EventReceiverGroup
 
 url = "http://localhost:8042"
 headers = {}
@@ -168,7 +168,7 @@ return.
 
 ```python
 from epr.client import Client
-from epr.models import Event, Event_Receiver, Event_Receiver_Group
+from epr.models import Event, EventReceiver, EventReceiverGroup
 
 url = "http://localhost:8042"
 headers = {}
@@ -208,7 +208,7 @@ We will now search for event receivers using the name, version, and type.
 ```python
 er_fields = ["id", "name", "type", "version", "description", "schema", "fingerprint", "created_at"]
 
-erfs = Event_Receiver()
+erfs = EventReceiver()
 erfs.name = "foo-receiver-3"
 erfs.version = "1.0.0"
 erfs.type = "dev.events.foo"
@@ -216,7 +216,7 @@ erfs.type = "dev.events.foo"
 event_receiver_results = client.search_event_receivers(params=erfs.as_dict_query(), fields=er_fields)
 print(f"{event_receiver_results}")
 
-erbs = Event_Receiver()
+erbs = EventReceiver()
 erbs.name = "bar-receiver-4"
 erbs.version = "1.0.0"
 erbs.type = "dev.events.bar"
@@ -229,7 +229,7 @@ Last we will search for event receiver groups using the name, version, and type.
 
 ```python
 erg_fields = ["id", "name", "type", "version", "description", "enabled", "created_at"]
-ergs = Event_Receiver_Group()
+ergs = EventReceiverGroup()
 ergs.name = "foo-bar-receiver-group-2"
 ergs.version = "1.0.0"
 ergs.type = "dev.events.foo.bar.complete"

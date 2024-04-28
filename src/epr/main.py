@@ -9,7 +9,7 @@ import sys
 
 from . import constants, create, errors, search
 from .config import Config
-from .models import Event, Event_Receiver, Event_Receiver_Group
+from .models import Event, EventReceiver, EventReceiverGroup
 
 debug = os.environ.get("EPR_DEBUG", False)
 level = logging.INFO
@@ -261,7 +261,7 @@ class CmdLine(object):
             event.event_receiver_id = args["event_receiver_id"]
             cfg.events.append(event)
         elif args["subparser_name"] == "event-receiver":
-            event_receiver = Event_Receiver()
+            event_receiver = EventReceiver()
             event_receiver.name = args["name"]
             event_receiver.type = args["type"]
             event_receiver.version = args["version"]
@@ -269,7 +269,7 @@ class CmdLine(object):
             event_receiver.schema = args["schema"]
             cfg.event_receivers.append(event_receiver)
         elif args["subparser_name"] == "event-receiver-group":
-            event_receiver_group = Event_Receiver_Group()
+            event_receiver_group = EventReceiverGroup()
             event_receiver_group.name = args["name"]
             event_receiver_group.type = args["type"]
             event_receiver_group.version = args["version"]
@@ -393,7 +393,7 @@ class CmdLine(object):
             dest="fields",
             action="store",
             default=None,
-            help="Fields of the Event",
+            help="Fields to return of the Event (comma separated list)",
         )
         event_receiver_parser = subparsers.add_parser("event-receiver", help="Event Receiver related options")
         event_receiver_parser.add_argument(
@@ -443,7 +443,7 @@ class CmdLine(object):
             dest="fields",
             action="store",
             default=None,
-            help="Fields of the Event Receiver",
+            help="Fields to return of the Event Receiver (comma separated list)",
         )
         event_receiver_group_parser = subparsers.add_parser(
             "event-receiver-group", help="Event Receiver Group related options"
@@ -495,12 +495,13 @@ class CmdLine(object):
             dest="fields",
             action="store",
             default=None,
-            help="Fields of the Event Receiver Group",
+            help="Fields to return of the Event Receiver Group (comma separated list)",
         )
         args = vars(parser.parse_args(sys.argv[2:]))
         url = args["epr_url"]
         token = args["epr_api_token"]
         cfg = Config(url=url, token=token)
+        fields = [x.strip() for x in args["fields"].split(",") if x] if args["fields"] else None
 
         cfg.debug = args["debug"]
         if args["subparser_name"] == "event":
@@ -516,9 +517,9 @@ class CmdLine(object):
             event.success = args["success"]
             event.event_receiver_id = args["event_receiver_id"]
             cfg.events.append(event)
-            cfg.event_fields = args["fields"]
+            cfg.event_fields = fields
         elif args["subparser_name"] == "event-receiver":
-            event_receiver = Event_Receiver()
+            event_receiver = EventReceiver()
             event_receiver.id = args["id"]
             event_receiver.name = args["name"]
             event_receiver.type = args["type"]
@@ -526,9 +527,9 @@ class CmdLine(object):
             event_receiver.description = args["description"]
             event_receiver.schema = args["schema"]
             cfg.event_receivers.append(event_receiver)
-            cfg.event_receiver_fields = args["fields"]
+            cfg.event_receiver_fields = fields
         elif args["subparser_name"] == "event-receiver-group":
-            event_receiver_group = Event_Receiver_Group()
+            event_receiver_group = EventReceiverGroup()
             event_receiver_group.id = args["id"]
             event_receiver_group.name = args["name"]
             event_receiver_group.type = args["type"]
@@ -536,7 +537,7 @@ class CmdLine(object):
             event_receiver_group.description = args["description"]
             event_receiver_group.event_receiver_ids = args["event_receiver_ids"]
             cfg.event_receiver_groups.append(event_receiver_group)
-            cfg.event_receiver_group_fields = args["fields"]
+            cfg.event_receiver_group_fields = fields
         return search.search(cfg)
 
     def version(self):

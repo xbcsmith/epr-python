@@ -11,8 +11,8 @@ from .fingerprint import GroupFingerprint, ReceiverFingerprint
 
 class ModelType(Enum):
     EVENT = "Event"
-    RECEIVER = "Event_Receiver"
-    GROUP = "Event_Receiver_Group"
+    RECEIVER = "EventReceiver"
+    GROUP = "EventReceiverGroup"
 
     def lower(self):
         return self.value.lower()
@@ -53,8 +53,8 @@ class Event(Model):
 
 
 @dataclass
-class Event_Receiver(Model):
-    """Data class for Event_Receivers"""
+class EventReceiver(Model):
+    """Data class for EventReceivers"""
 
     id: str = field(default="", compare=False)
     name: str = ""
@@ -70,8 +70,8 @@ class Event_Receiver(Model):
 
 
 @dataclass
-class Event_Receiver_Group(Model):
-    """Data class for Event_Receiver_Groups"""
+class EventReceiverGroup(Model):
+    """Data class for EventReceiverGroups"""
 
     id: str = field(default="", compare=False)
     name: str = ""
@@ -93,8 +93,8 @@ class Data(Model):
     """Data class for Data"""
 
     events = List[Event]
-    receivers = List[Event_Receiver]
-    receiver_groups = List[Event_Receiver_Group]
+    receivers = List[EventReceiver]
+    receiver_groups = List[EventReceiverGroup]
 
 
 @dataclass

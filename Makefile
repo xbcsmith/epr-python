@@ -27,7 +27,8 @@ wheel: ; $(info $(M) creating sdist bdist_wheel...) @ ## Create an sdist bdist_w
 .PHONY: clean
 clean: ; $(info $(M) cleaning...)	@ ## Cleanup everything
 	@rm -rvf bin tools vendor build dist
-	@rm -rvf *.egg-info *.egg .pytest_cache .ruff_cache .tox .coverage
+	@rm -rvf *.egg-info *.egg .pytest_cache .ruff_cache .tox .coverage src/*.egg-info 
+	@rm -rvf src/epr/__pycache__ tests/__pycache__ tests/unit/__pycache__
 
 .PHONY: help
 help:
