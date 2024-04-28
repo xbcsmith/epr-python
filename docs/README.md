@@ -1,10 +1,12 @@
-# epr python
+# EPR Python
 
 ## Overview
 
 EPR Python is a python client for the Event Provenance Registry server.
 
 ## Model Example
+
+A model example using the models in the `epr` package.
 
 ```python
 from epr.models import Event_Receiver
@@ -21,6 +23,8 @@ print(f"Type: {event_receiver_foo.type}")
 print(f"Fingerprint: {event_receiver_foo.compute_fingerprint()}")
 ```
 
+A model example a dictionary and the models in the `epr` package.
+
 ```python
 from epr.models import Event_Receiver
 
@@ -33,7 +37,9 @@ print(f"Type: {erf_obj.type}")
 print(f"Fingerprint: {erf_obj.compute_fingerprint()}")
 ```
 
-## Client Example
+## Client Create Example
+
+A Client create example using the models in the `epr` package.
 
 ```python
 from epr.client import Client
@@ -114,6 +120,8 @@ print(f"{results}")
 
 ### TL;DR Client Example
 
+Create an event receiver and event receiver group. Then send events.
+
 ```python
 from epr.client import Client
 from epr.models import Event, Event_Receiver, Event_Receiver_Group
@@ -150,4 +158,82 @@ eb_id = eb_res["data"]["create_event"]
 
 results = {"events": [ef_id, eb_id], "event_receivers": [erf_id, erb_id], "event_receiver_groups": [erg_id]}
 print(f"{results}")
+```
+
+## Client Search Example
+
+Search for events we created above by name, version, and release. Use the
+release values from the Events we created above. Also set the fields we want to
+return.
+
+```python
+from epr.client import Client
+from epr.models import Event, Event_Receiver, Event_Receiver_Group
+
+url = "http://localhost:8042"
+headers = {}
+client = Client(url, headers=headers)
+
+e_fields = [
+    "id",
+    "name",
+    "version",
+    "release",
+    "platform_id",
+    "package",
+    "description",
+    "success",
+    "event_receiver_id",
+]
+
+efs = Event()
+efs.name = "foo"
+efs.version = "1.0.0"
+efs.release = ef["release"]
+
+event_results = client.search_events(params=efs.as_dict_query(), fields=e_fields)
+print(f"{event_results}")
+
+ebs = Event()
+ebs.name = "bar"
+ebs.version = "1.0.0"
+ebs.release = eb["release"]
+
+event_results = client.search_events(params=ebs.as_dict_query(), fields=e_fields)
+print(f"{event_results}")
+```
+
+We will now search for event receivers using the name, version, and type.
+
+```python
+er_fields = ["id", "name", "type", "version", "description", "schema", "fingerprint", "created_at"]
+
+erfs = Event_Receiver()
+erfs.name = "foo-receiver-3"
+erfs.version = "1.0.0"
+erfs.type = "dev.events.foo"
+
+event_receiver_results = client.search_event_receivers(params=erfs.as_dict_query(), fields=er_fields)
+print(f"{event_receiver_results}")
+
+erbs = Event_Receiver()
+erbs.name = "bar-receiver-4"
+erbs.version = "1.0.0"
+erbs.type = "dev.events.bar"
+
+event_receiver_results = client.search_event_receivers(params=erbs.as_dict_query(), fields=er_fields)
+print(f"{event_receiver_results}")
+```
+
+Last we will search for event receiver groups using the name, version, and type.
+
+```python
+erg_fields = ["id", "name", "type", "version", "description", "enabled", "created_at"]
+ergs = Event_Receiver_Group()
+ergs.name = "foo-bar-receiver-group-2"
+ergs.version = "1.0.0"
+ergs.type = "dev.events.foo.bar.complete"
+
+event_receiver_group_results = client.search_event_receiver_groups(params=ergs.as_dict_query(), fields=erg_fields)
+print(f"{event_receiver_group_results}")
 ```
