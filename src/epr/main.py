@@ -144,9 +144,9 @@ class CmdLine(object):
         event_parser.add_argument(
             "--success",
             dest="success",
-            action="store",
-            default=None,
-            required=True,
+            action="store_true",
+            default=False,
+            required=False,
             help="Success of the Event",
         )
         event_parser.add_argument(
@@ -240,7 +240,13 @@ class CmdLine(object):
             required=True,
             help="Event Receiver IDs of the Event Receiver Group",
         )
-
+        event_receiver_group_parser.add_argument(
+            "--disable",
+            dest="disable",
+            action="store_true",
+            default=False,
+            help="Disable the Event Receiver Group",
+        )
         args = vars(parser.parse_args(sys.argv[2:]))
 
         url = args["epr_url"]
@@ -274,7 +280,8 @@ class CmdLine(object):
             event_receiver_group.type = args["type"]
             event_receiver_group.version = args["version"]
             event_receiver_group.description = args["description"]
-            event_receiver_group.event_receiver_ids = args["event_receiver_ids"]
+            event_receiver_group.event_receiver_ids = [x.strip() for x in args["event_receiver_ids"].split(",")]
+            event_receiver_group.enabled = True if not args["disable"] else False
             cfg.event_receiver_groups.append(event_receiver_group)
         return create.create(cfg)
 
@@ -489,6 +496,13 @@ class CmdLine(object):
             action="store",
             default=None,
             help="Event Receiver IDs of the Event Receiver Group",
+        )
+        event_receiver_group_parser.add_argument(
+            "--enabled",
+            dest="enabled",
+            action="store",
+            default=None,
+            help="Enabled value of the Event Receiver Group",
         )
         event_receiver_group_parser.add_argument(
             "--fields",

@@ -79,6 +79,7 @@ event_receiver_group_foo.type = "dev.events.foo.bar.complete"
 event_receiver_group_foo.version = "1.0.0"
 event_receiver_group_foo.description = "The Event Receiver Group for the Foo and Bar of Brixton"
 event_receiver_group_foo.event_receiver_ids = [event_receiver_foo_id, event_receiver_bar_id]
+event_receiver_group_foo.enabled = True
 
 event_receiver_group_foo_res = client.create_event_receiver_group(params=event_receiver_group_foo)
 event_receiver_group_foo_id = event_receiver_group_foo_res["data"]["create_event_receiver_group"]
@@ -141,7 +142,7 @@ erb = dict(name="bar-receiver-4", type="dev.events.bar", version="1.0.0", descri
 erb_res = client.create_event_receiver(params=erb)
 erb_id = erb_res["data"]["create_event_receiver"]
 
-erg = dict(name="foo-bar-receiver-group-2", type="dev.events.foo.bar.complete", version="1.0.0", description="The Event Receiver Group for the Foo and Bar of Brixton", event_receiver_ids=[erf_id, erb_id])
+erg = dict(name="foo-bar-receiver-group-2", type="dev.events.foo.bar.complete", version="1.0.0", description="The Event Receiver Group for the Foo and Bar of Brixton", event_receiver_ids=[erf_id, erb_id], enabled=True)
 
 erg_res = client.create_event_receiver_group(params=erg)
 erg_id = erg_res["data"]["create_event_receiver_group"]

@@ -51,6 +51,4 @@ def search(config: Config):
     results = {"events": events, "event_receivers": event_receivers, "event_receiver_groups": event_receiver_groups}
     print(f"{results}")
 
-    import pdb
-
-    pdb.set_trace()
+    return results
