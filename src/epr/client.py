@@ -10,6 +10,7 @@ from urllib.parse import urljoin
 import urllib3
 
 from .common import EnhancedJSONEncoder
+from .models import GraphQLQuery
 
 urllib3.disable_warnings()
 
@@ -51,9 +52,9 @@ class Client(object):
             },
         }
 
-    def new_graphql_search_query(
+    def _new_graphql_search_query(
         self, operation: str, params: Optional[dict] = None, fields: Optional[list] = None
-    ) -> dict:
+    ) -> GraphQLQuery:
         """
         Generates a new GraphQL search query based on the given operation, parameters, and fields.
 
@@ -70,19 +71,19 @@ class Client(object):
         Example:
             new_graphql_search_query("events", {"name": "foo"}, ["id", "name", "email"])
             # Returns:
-            # {
+            # GraphQLQuery({
             #     "query": "query ($obj: FindEventInput!) {events(event: $obj) {id, name, version, release}}",
             #     "variables": {"obj": {"name": "foo"}}
-            # }
+            # })
         """
         variables = dict(obj=params)
         method = self._operation_map["search"][operation]
         op = self._operation_map["operation"][operation]
         _fields = ",".join(fields) if fields is not None else "id"
         query = f"""query ($obj: {method}){{{operation}({op}: $obj) {{ {_fields} }}}}"""
-        return {"query": query, "variables": variables}
+        return GraphQLQuery(query=query, variables=variables)
 
-    def new_graphql_mutation_query(self, operation: str, params: Optional[dict] = None) -> dict:
+    def _new_graphql_mutation_query(self, operation: str, params: Optional[dict] = None) -> GraphQLQuery:
         """
         Creates a new GraphQL mutation query based on the provided operation and parameters.
 
@@ -96,18 +97,18 @@ class Client(object):
         Example:
             new_graphql_mutation_query("create_event", {"name": "foo", "version": "1.0.1"})
             # Returns:
-            # {
+            # GraphQLQuery({
             #     "query": "mutation ($obj: CreateEventInput!) {create_event(event: $obj) {id, name, version}}",
             #     "variables": {"obj": {"name": "foo", "version": "1.0.1"}}
-        # }
+            # })
         """
         variables = dict(obj=params)
         method = self._operation_map["mutation"][operation]
         op = self._operation_map["create"][operation]
         query = f"""mutation ($obj: {method}){{{operation}({op}: $obj)}}"""
-        return {"query": query, "variables": variables}
+        return GraphQLQuery(query=query, variables=variables)
 
-    def query(self, query: str, variables: Optional[dict] = None) -> Any:
+    def _query(self, query: GraphQLQuery) -> Any:
         """
         Sends a GraphQL query to the server.
 
@@ -118,10 +119,10 @@ class Client(object):
         Returns:
             Any: The response data from the server.
         """
-        response = self.post(self.target, data={"query": query, "variables": variables})
+        response = self._post(self.target, data=query.as_dict())
         return json.loads(response.decode("utf-8"))
 
-    def post(self, url: str, data: dict) -> bytes:
+    def _post(self, url: str, data: dict) -> bytes:
         """
         Sends a POST request to the specified URL with the provided data.
 
@@ -132,12 +133,13 @@ class Client(object):
         Returns:
             bytes: The data received in the response to the POST request.
         """
-        http = urllib3.PoolManager()
+        timeout = urllib3.Timeout(connect=2.0, read=10.0)
+        http = urllib3.PoolManager(timeout=timeout)
         encoded_data = json.dumps(data, cls=EnhancedJSONEncoder).encode("utf-8")
         response = http.request("POST", url, body=encoded_data, headers=self.headers)
         return response.data
 
-    def search(self, operation: str, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
+    def _search(self, operation: str, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
         """
         Sends a GraphQL search query to the server.
 
@@ -149,10 +151,11 @@ class Client(object):
         Returns:
             Any: The response data from the server.
         """
-        query = self.new_graphql_search_query(operation, params, fields)
-        return self.query(query["query"], query["variables"])
+        query = self._new_graphql_search_query(operation, params, fields)
 
-    def mutation(self, operation: str, params: Optional[dict] = None) -> Any:
+        return self._query(query=query)
+
+    def _mutation(self, operation: str, params: Optional[dict] = None) -> Any:
         """
         Sends a GraphQL mutation query to the server.
 
@@ -166,8 +169,8 @@ class Client(object):
         This function creates a new GraphQL mutation query using the provided operation and parameters.
         It then sends the query to the server using the `query` method and returns the response data.
         """
-        query = self.new_graphql_mutation_query(operation, params)
-        return self.query(query["query"], query["variables"])
+        query = self._new_graphql_mutation_query(operation, params)
+        return self._query(query)
 
     def search_events(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
         """
@@ -182,7 +185,7 @@ class Client(object):
 
         This function performs a search for events based on the provided parameters and fields.
         """
-        return self.search("events", params, fields)
+        return self._search("events", params, fields)
 
     def search_event_receivers(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
         """
@@ -197,7 +200,7 @@ class Client(object):
 
         This function performs a search for event receivers based on the given parameters and fields.
         """
-        return self.search("event_receivers", params, fields)
+        return self._search("event_receivers", params, fields)
 
     def search_event_receiver_groups(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
         """
@@ -212,7 +215,7 @@ class Client(object):
 
         This function performs a search for event receiver groups based on the given parameters and fields.
         """
-        return self.search("event_receiver_groups", params, fields)
+        return self._search("event_receiver_groups", params, fields)
 
     def create_event(self, params: Optional[dict] = None) -> Any:
         """
@@ -226,7 +229,7 @@ class Client(object):
 
         This function sends a mutation query to create an event using the provided parameters.
         """
-        return self.mutation("create_event", params)
+        return self._mutation("create_event", params)
 
     def create_event_receiver(self, params: Optional[dict] = None) -> Any:
         """
@@ -240,7 +243,7 @@ class Client(object):
 
         This function sends a mutation query to create an event receiver using the provided parameters.
         """
-        return self.mutation("create_event_receiver", params)
+        return self._mutation("create_event_receiver", params)
 
     def create_event_receiver_group(self, params: Optional[dict] = None) -> Any:
         """
@@ -254,4 +257,4 @@ class Client(object):
 
         This function sends a mutation query to create an event receiver group using the provided parameters.
         """
-        return self.mutation("create_event_receiver_group", params)
+        return self._mutation("create_event_receiver_group", params)

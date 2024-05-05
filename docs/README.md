@@ -28,7 +28,13 @@ A model example a dictionary and the models in the `epr` package.
 ```python
 from epr.models import EventReceiver
 
-erf = dict(name="foo-receiver", type="dev.events.foo", version="1.0.0", description="The Event Receiver for the Foo of Brixton", schema="{}")
+erf = dict(
+    name="foo-receiver-2",
+    type="dev.events.foo",
+    version="1.0.0",
+    description="The Event Receiver for the Foo of Brixton",
+    schema="{}",
+)
 
 erf_obj = EventReceiver(**erf)
 
@@ -42,6 +48,8 @@ print(f"Fingerprint: {erf_obj.compute_fingerprint()}")
 A Client create example using the models in the `epr` package.
 
 ```python
+import time
+
 from epr.client import Client
 from epr.models import Event, EventReceiver, EventReceiverGroup
 
@@ -50,6 +58,7 @@ headers = {}
 client = Client(url, headers=headers)
 
 # Create an event receiver
+
 event_receiver_foo = EventReceiver()
 event_receiver_foo.name = "foo-receiver-2"
 event_receiver_foo.type = "dev.events.foo"
@@ -93,7 +102,7 @@ event_foo.release = str(time.time())
 event_foo.platform_id = "x86_64-gnu-linux-9"
 event_foo.package = "rpm"
 event_foo.description = "The Foo of Brixton"
-event_foo.payload = "{\"name\": \"foo\"}"
+event_foo.payload = '{"name": "foo"}'
 event_foo.success = True
 event_foo.event_receiver_id = event_receiver_foo_id
 
@@ -107,14 +116,18 @@ event_bar.release = str(time.time())
 event_bar.platform_id = "x86_64-gnu-linux-9"
 event_bar.package = "rpm"
 event_bar.description = "The Bar of Brixton"
-event_bar.payload = "{\"name\": \"bar\"}"
+event_bar.payload = '{"name": "bar"}'
 event_bar.success = True
 event_bar.event_receiver_id = event_receiver_bar_id
 
 event_bar_res = client.create_event(params=event_bar)
 event_bar_id = event_bar_res["data"]["create_event"]
 
-results = {"events": [event_foo_id, event_bar_id], "event_receivers": [event_receiver_foo_id, event_receiver_bar_id], "event_receiver_groups": [event_receiver_group_foo_id]}
+results = {
+    "events": [event_foo_id, event_bar_id],
+    "event_receivers": [event_receiver_foo_id, event_receiver_bar_id],
+    "event_receiver_groups": [event_receiver_group_foo_id],
+}
 
 print(f"{results}")
 ```
@@ -125,51 +138,91 @@ Create an event receiver and event receiver group. Then send events.
 
 ```python
 from epr.client import Client
-from epr.models import Event, EventReceiver, EventReceiverGroup
+from epr.models import Event, EventReceiver, EventReceiver_Group
 
 url = "http://localhost:8042"
 headers = {}
 client = Client(url, headers=headers)
 
-erf = dict(name="foo-receiver-3", type="dev.events.foo", version="1.0.0", description="The Event Receiver for the Foo of Brixton", schema="{}")
+erf = dict(
+    name="foo-receiver-3",
+    type="dev.events.foo",
+    version="1.0.0",
+    description="The Event Receiver for the Foo of Brixton",
+    schema="{}",
+)
 
 erf_res = client.create_event_receiver(params=erf)
 erf_id = erf_res["data"]["create_event_receiver"]
 
 
-erb = dict(name="bar-receiver-4", type="dev.events.bar", version="1.0.0", description="The Event Receiver for the Bar of Brixton", schema="{}")
+erb = dict(
+    name="bar-receiver-4",
+    type="dev.events.bar",
+    version="1.0.0",
+    description="The Event Receiver for the Bar of Brixton",
+    schema="{}",
+)
 
 erb_res = client.create_event_receiver(params=erb)
 erb_id = erb_res["data"]["create_event_receiver"]
 
-erg = dict(name="foo-bar-receiver-group-2", type="dev.events.foo.bar.complete", version="1.0.0", description="The Event Receiver Group for the Foo and Bar of Brixton", event_receiver_ids=[erf_id, erb_id], enabled=True)
+erg = dict(
+    name="foo-bar-receiver-group-2",
+    type="dev.events.foo.bar.complete",
+    version="1.0.0",
+    description="The Event Receiver Group for the Foo and Bar of Brixton",
+    enabled=True,
+    event_receiver_ids=[erf_id, erb_id],
+)
 
 erg_res = client.create_event_receiver_group(params=erg)
 erg_id = erg_res["data"]["create_event_receiver_group"]
 
-ef = dict(name="foo", version="1.0.0", release=str(time.time()), platform_id="x86_64-gnu-linux-9", package="rpm", description="The Foo of Brixton", payload="{}", success=True, event_receiver_id=erf_id)
+ef = dict(
+    name="foo",
+    version="1.0.0",
+    release=str(time.time()),
+    platform_id="x86_64-gnu-linux-9",
+    package="rpm",
+    description="The Foo of Brixton",
+    payload="{}",
+    success=True,
+    event_receiver_id=erf_id,
+)
 
 ef_res = client.create_event(params=ef)
 ef_id = ef_res["data"]["create_event"]
 
-eb = dict(name="bar", version="1.0.0", release=str(time.time()), platform_id="x86_64-gnu-linux-9", package="rpm", description="The Bar of Brixton", payload="{}", success=True, event_receiver_id=erb_id)
+eb = dict(
+    name="bar",
+    version="1.0.0",
+    release=str(time.time()),
+    platform_id="x86_64-gnu-linux-9",
+    package="rpm",
+    description="The Bar of Brixton",
+    payload="{}",
+    success=True,
+    event_receiver_id=erb_id,
+)
 
 eb_res = client.create_event(params=eb)
 eb_id = eb_res["data"]["create_event"]
 
 results = {"events": [ef_id, eb_id], "event_receivers": [erf_id, erb_id], "event_receiver_groups": [erg_id]}
+
 print(f"{results}")
 ```
 
 ## Client Search Example
 
-Search for events we created above by name, version, and release. Use the
-release values from the Events we created above. Also set the fields we want to
-return.
+First we will search for events we created above. Here we will search by name,
+version, and release. We will use the release values from the Events we created
+above. We will also set the fields we want to return.
 
 ```python
 from epr.client import Client
-from epr.models import Event, EventReceiver, EventReceiverGroup
+from epr.models import Event, EventReceiver, EventReceiver_Group
 
 url = "http://localhost:8042"
 headers = {}
@@ -229,8 +282,8 @@ print(f"{event_receiver_results}")
 Last we will search for event receiver groups using the name, version, and type.
 
 ```python
-erg_fields = ["id", "name", "type", "version", "description", "enabled", "created_at"]
-ergs = EventReceiverGroup()
+erg_fields = ["id", "name", "type", "version", "description", "enabled", "created_at", "event_receiver_ids"]
+ergs = EventReceiver_Group()
 ergs.name = "foo-bar-receiver-group-2"
 ergs.version = "1.0.0"
 ergs.type = "dev.events.foo.bar.complete"
@@ -238,3 +291,4 @@ ergs.type = "dev.events.foo.bar.complete"
 event_receiver_group_results = client.search_event_receiver_groups(params=ergs.as_dict_query(), fields=erg_fields)
 print(f"{event_receiver_group_results}")
 ```
+

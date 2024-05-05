@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List
+from typing import List
+
+from .models import Event, EventReceiver, EventReceiverGroup
 
 
 @dataclass
@@ -14,9 +16,9 @@ class Config:
     token: str
     debug: bool = False
 
-    events: List[Dict[str, Any]] = field(default_factory=list)
-    event_receivers: List[Dict[str, Any]] = field(default_factory=list)
-    event_receiver_groups: List[Dict[str, Any]] = field(default_factory=list)
+    events: List[Event] = field(default_factory=list)
+    event_receivers: List[EventReceiver] = field(default_factory=list)
+    event_receiver_groups: List[EventReceiverGroup] = field(default_factory=list)
 
     event_fields: List[str] = field(default_factory=list)
     event_receiver_fields: List[str] = field(default_factory=list)

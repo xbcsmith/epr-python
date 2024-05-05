@@ -113,3 +113,9 @@ class Message(Model):
     platform_id: str
     package: str
     data: Data
+
+
+@dataclass
+class GraphQLQuery(Model):
+    query: str
+    variables: str

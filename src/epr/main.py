@@ -45,6 +45,20 @@ class CmdLine(object):
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
 
+    def _handle_fields(self, value):
+        fields = None
+        if value is None:
+            return fields
+        if "," in value:
+            fields = [x.strip() for x in value.split(",") if x]
+        elif " " in value:
+            fields = [x.strip() for x in value.split(" ") if x]
+        elif len(value.strip()) == 26:
+            fields = [value.strip()]
+        else:
+            raise ValueError(f"Invalid value: {value}")
+        return fields
+
     def create(self):
         """
         create Events, Event Receivers, and Event Receiver Groups
@@ -238,7 +252,7 @@ class CmdLine(object):
             action="store",
             default=None,
             required=True,
-            help="Event Receiver IDs of the Event Receiver Group",
+            help="Event Receiver IDs of the Event Receiver Group (comma separated list)",
         )
         event_receiver_group_parser.add_argument(
             "--disable",
@@ -280,7 +294,7 @@ class CmdLine(object):
             event_receiver_group.type = args["type"]
             event_receiver_group.version = args["version"]
             event_receiver_group.description = args["description"]
-            event_receiver_group.event_receiver_ids = [x.strip() for x in args["event_receiver_ids"].split(",")]
+            event_receiver_group.event_receiver_ids = self._handle_fields(args["event_receiver_ids"])
             event_receiver_group.enabled = True if not args["disable"] else False
             cfg.event_receiver_groups.append(event_receiver_group)
         return create.create(cfg)
@@ -515,7 +529,7 @@ class CmdLine(object):
         url = args["epr_url"]
         token = args["epr_api_token"]
         cfg = Config(url=url, token=token)
-        fields = [x.strip() for x in args["fields"].split(",") if x] if args["fields"] else None
+        fields = self._handle_fields(args["fields"])
 
         cfg.debug = args["debug"]
         if args["subparser_name"] == "event":
@@ -549,7 +563,7 @@ class CmdLine(object):
             event_receiver_group.type = args["type"]
             event_receiver_group.version = args["version"]
             event_receiver_group.description = args["description"]
-            event_receiver_group.event_receiver_ids = args["event_receiver_ids"]
+            event_receiver_group.event_receiver_ids = self._handle_fields(args["event_receiver_ids"])
             cfg.event_receiver_groups.append(event_receiver_group)
             cfg.event_receiver_group_fields = fields
         return search.search(cfg)
