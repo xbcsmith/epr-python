@@ -138,7 +138,7 @@ Create an event receiver and event receiver group. Then send events.
 
 ```python
 from epr.client import Client
-from epr.models import Event, EventReceiver, EventReceiver_Group
+from epr.models import Event, EventReceiver, EventReceiverGroup
 
 url = "http://localhost:8042"
 headers = {}
@@ -222,7 +222,7 @@ above. We will also set the fields we want to return.
 
 ```python
 from epr.client import Client
-from epr.models import Event, EventReceiver, EventReceiver_Group
+from epr.models import Event, EventReceiver, EventReceiverGroup
 
 url = "http://localhost:8042"
 headers = {}
@@ -283,7 +283,7 @@ Last we will search for event receiver groups using the name, version, and type.
 
 ```python
 erg_fields = ["id", "name", "type", "version", "description", "enabled", "created_at", "event_receiver_ids"]
-ergs = EventReceiver_Group()
+ergs = EventReceiverGroup()
 ergs.name = "foo-bar-receiver-group-2"
 ergs.version = "1.0.0"
 ergs.type = "dev.events.foo.bar.complete"

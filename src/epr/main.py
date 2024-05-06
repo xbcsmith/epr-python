@@ -47,13 +47,14 @@ class CmdLine(object):
 
     def _handle_fields(self, value):
         fields = None
+        ulid_length = 26  # a valid ULID length is 26 characters
         if value is None:
             return fields
         if "," in value:
             fields = [x.strip() for x in value.split(",") if x]
         elif " " in value:
             fields = [x.strip() for x in value.split(" ") if x]
-        elif len(value.strip()) == 26:
+        elif len(value.strip()) == ulid_length:
             fields = [value.strip()]
         else:
             raise ValueError(f"Invalid value: {value}")
