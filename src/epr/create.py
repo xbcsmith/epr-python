@@ -20,17 +20,17 @@ def create(config: Config):
 
     events = []
     for e in config.events:
-        event = client.create_event(params=e)
+        event = client.create_event(params=e.as_dict())
         event_id = event["data"]["create_event"]
         events.append(event_id)
     event_receivers = []
     for er in config.event_receivers:
-        event_receiver = client.create_event_receiver(params=er)
+        event_receiver = client.create_event_receiver(params=er.as_dict())
         event_receiver_id = event_receiver["data"]["create_event_receiver"]
         event_receivers.append(event_receiver_id)
     event_receiver_groups = []
     for erg in config.event_receiver_groups:
-        event_receiver_group = client.create_event_receiver_group(params=erg)
+        event_receiver_group = client.create_event_receiver_group(params=erg.as_dict())
         event_receiver_group_id = event_receiver_group["data"]["create_event_receiver_group"]
         event_receiver_groups.append(event_receiver_group_id)
 
