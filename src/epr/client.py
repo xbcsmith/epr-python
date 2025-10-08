@@ -7,17 +7,15 @@ import logging
 from typing import Any, Optional
 from urllib.parse import urljoin
 
-import urllib3
+import httpx
 
 from .common import EnhancedJSONEncoder
 from .models import GraphQLQuery
 
-urllib3.disable_warnings()
-
 logger = logging.getLogger(__name__)
 
 
-class Client(object):
+class Client:
     def __init__(self, url, headers=None):
         self.url = url
         self.api_version = "v1"
@@ -51,6 +49,24 @@ class Client(object):
                 "create_event_receiver_group": "event_receiver_group",
             },
         }
+        self._client = None
+
+    async def __aenter__(self):
+        """Async context manager entry"""
+        self._client = httpx.AsyncClient(timeout=httpx.Timeout(connect=2.0, read=10.0, write=10.0, pool=10.0))
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit"""
+        if self._client:
+            await self._client.aclose()
+            self._client = None
+
+    async def close(self):
+        """Manually close the client"""
+        if self._client:
+            await self._client.aclose()
+            self._client = None
 
     def _new_graphql_search_query(
         self, operation: str, params: Optional[dict] = None, fields: Optional[list] = None
@@ -108,21 +124,20 @@ class Client(object):
         query = f"""mutation ($obj: {method}){{{operation}({op}: $obj)}}"""
         return GraphQLQuery(query=query, variables=variables)
 
-    def _query(self, query: GraphQLQuery) -> Any:
+    async def _query(self, query: GraphQLQuery) -> Any:
         """
         Sends a GraphQL query to the server.
 
         Args:
-            query (str): The GraphQL query string.
-            variables (dict, optional): The variables to be used in the query. Defaults to None.
+            query (GraphQLQuery): The GraphQL query object containing query and variables.
 
         Returns:
             Any: The response data from the server.
         """
-        response = self._post(self.target, data=query.as_dict())
-        return json.loads(response.decode("utf-8"))
+        response = await self._post(self.target, data=query.as_dict())
+        return response.json()
 
-    def _post(self, url: str, data: dict) -> bytes:
+    async def _post(self, url: str, data: dict) -> httpx.Response:
         """
         Sends a POST request to the specified URL with the provided data.
 
@@ -131,15 +146,17 @@ class Client(object):
             data (dict): The data to be sent in the POST request.
 
         Returns:
-            bytes: The data received in the response to the POST request.
+            httpx.Response: The response from the server.
         """
-        timeout = urllib3.Timeout(connect=2.0, read=10.0)
-        http = urllib3.PoolManager(timeout=timeout)
-        encoded_data = json.dumps(data, cls=EnhancedJSONEncoder).encode("utf-8")
-        response = http.request("POST", url, body=encoded_data, headers=self.headers)
-        return response.data
+        if not self._client:
+            self._client = httpx.AsyncClient(timeout=httpx.Timeout(connect=2.0, read=10.0, write=10.0, pool=10.0))
 
-    def _search(self, operation: str, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
+        json_data = json.dumps(data, cls=EnhancedJSONEncoder)
+        response = await self._client.post(url, content=json_data, headers=self.headers)
+        response.raise_for_status()
+        return response
+
+    async def _search(self, operation: str, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
         """
         Sends a GraphQL search query to the server.
 
@@ -152,10 +169,9 @@ class Client(object):
             Any: The response data from the server.
         """
         query = self._new_graphql_search_query(operation, params, fields)
+        return await self._query(query=query)
 
-        return self._query(query=query)
-
-    def _mutation(self, operation: str, params: Optional[dict] = None) -> Any:
+    async def _mutation(self, operation: str, params: Optional[dict] = None) -> Any:
         """
         Sends a GraphQL mutation query to the server.
 
@@ -170,9 +186,9 @@ class Client(object):
         It then sends the query to the server using the `query` method and returns the response data.
         """
         query = self._new_graphql_mutation_query(operation, params)
-        return self._query(query)
+        return await self._query(query)
 
-    def search_events(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
+    async def search_events(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
         """
         Searches for events based on the provided parameters and fields.
 
@@ -185,9 +201,9 @@ class Client(object):
 
         This function performs a search for events based on the provided parameters and fields.
         """
-        return self._search("events", params, fields)
+        return await self._search("events", params, fields)
 
-    def search_event_receivers(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
+    async def search_event_receivers(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
         """
         Search for event receivers based on the given parameters and fields.
 
@@ -200,9 +216,9 @@ class Client(object):
 
         This function performs a search for event receivers based on the given parameters and fields.
         """
-        return self._search("event_receivers", params, fields)
+        return await self._search("event_receivers", params, fields)
 
-    def search_event_receiver_groups(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
+    async def search_event_receiver_groups(self, params: Optional[dict] = None, fields: Optional[list] = None) -> Any:
         """
         Search for event receiver groups based on the given parameters and fields.
 
@@ -215,9 +231,9 @@ class Client(object):
 
         This function performs a search for event receiver groups based on the given parameters and fields.
         """
-        return self._search("event_receiver_groups", params, fields)
+        return await self._search("event_receiver_groups", params, fields)
 
-    def create_event(self, params: Optional[dict] = None) -> Any:
+    async def create_event(self, params: Optional[dict] = None) -> Any:
         """
         Creates an event using the provided parameters.
 
@@ -229,9 +245,9 @@ class Client(object):
 
         This function sends a mutation query to create an event using the provided parameters.
         """
-        return self._mutation("create_event", params)
+        return await self._mutation("create_event", params)
 
-    def create_event_receiver(self, params: Optional[dict] = None) -> Any:
+    async def create_event_receiver(self, params: Optional[dict] = None) -> Any:
         """
         Creates an event receiver using the provided parameters.
 
@@ -243,9 +259,9 @@ class Client(object):
 
         This function sends a mutation query to create an event receiver using the provided parameters.
         """
-        return self._mutation("create_event_receiver", params)
+        return await self._mutation("create_event_receiver", params)
 
-    def create_event_receiver_group(self, params: Optional[dict] = None) -> Any:
+    async def create_event_receiver_group(self, params: Optional[dict] = None) -> Any:
         """
         Creates an event receiver group using the provided parameters.
 
@@ -257,4 +273,4 @@ class Client(object):
 
         This function sends a mutation query to create an event receiver group using the provided parameters.
         """
-        return self._mutation("create_event_receiver_group", params)
+        return await self._mutation("create_event_receiver_group", params)
