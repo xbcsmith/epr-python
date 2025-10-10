@@ -118,4 +118,4 @@ class Message(Model):
 @dataclass
 class GraphQLQuery(Model):
     query: str
-    variables: str
+    variables: Dict[str, Any] = field(default_factory=dict)

@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: © 2024 Brett Smith <xbcsmith@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
-import mock
+from unittest import mock
 
 from epr import errors
 from tests import base
@@ -54,7 +54,7 @@ def fake_exception():
     frame = FakeFrame(code, {})
     tb = FakeTraceback([frame], [1])
     exc = FakeException("foo").with_traceback(tb)
-    return FakeException, exc, tb
+    return FakeException, exc, exc._fake_traceback
 
 
 class FakeCode(object):
@@ -86,17 +86,9 @@ class FakeTraceback(object):
 
 class FakeException(Exception):
     def __init__(self, *args, **kwargs):
-        self._tb = None
         super(FakeException, self).__init__(*args, **kwargs)
-
-    @property
-    def __traceback__(self):
-        return self._tb
-
-    @__traceback__.setter
-    def __traceback__(self, value):
-        self._tb = value
+        self._fake_traceback = None
 
     def with_traceback(self, value):
-        self._tb = value
+        self._fake_traceback = value
         return self

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
+import asyncio
 import logging
 import os
 import sys
@@ -46,10 +47,9 @@ class CmdLine(object):
         getattr(self, args.command)()
 
     def _handle_fields(self, value):
-        fields = None
         ulid_length = 26  # a valid ULID length is 26 characters
         if value is None:
-            return fields
+            return []
         if "," in value:
             fields = [x.strip() for x in value.split(",") if x]
         elif " " in value:
@@ -298,7 +298,7 @@ class CmdLine(object):
             event_receiver_group.event_receiver_ids = self._handle_fields(args["event_receiver_ids"])
             event_receiver_group.enabled = True if not args["disable"] else False
             cfg.event_receiver_groups.append(event_receiver_group)
-        return create.create(cfg)
+        return asyncio.run(create.create(cfg))
 
     def search(self):
         """
@@ -567,7 +567,7 @@ class CmdLine(object):
             event_receiver_group.event_receiver_ids = self._handle_fields(args["event_receiver_ids"])
             cfg.event_receiver_groups.append(event_receiver_group)
             cfg.event_receiver_group_fields = fields
-        return search.search(cfg)
+        return asyncio.run(search.search(cfg))
 
     def version(self):
         """
